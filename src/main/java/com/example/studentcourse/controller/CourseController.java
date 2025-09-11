@@ -17,7 +17,7 @@ public class CourseController {
     private CourseService courseService;
     
     // Insert a new course
-    @PostMapping
+    @PostMapping("/insert_course")
     public ResponseEntity<Course> insertCourse(@RequestBody Course course) {
         Course savedCourse = courseService.insertCourse(course);
         return new ResponseEntity<>(savedCourse, HttpStatus.CREATED);
