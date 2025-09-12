@@ -1,0 +1,664 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Course Management System</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            padding: 30px;
+            text-align: center;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .main-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            padding: 30px;
+        }
+
+        .section {
+            background: #f8fafc;
+            border-radius: 15px;
+            padding: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+            transition: transform 0.3s ease;
+        }
+
+        .section:hover {
+            transform: translateY(-5px);
+        }
+
+        .section h2 {
+            color: #4f46e5;
+            margin-bottom: 20px;
+            font-size: 1.5rem;
+            border-bottom: 3px solid #4f46e5;
+            padding-bottom: 10px;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            transition: border-color 0.3s ease;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .btn {
+            background: linear-gradient(135deg, #4f46e5 0%, #7c3aed 100%);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 500;
+            transition: all 0.3s ease;
+            margin-right: 10px;
+            margin-bottom: 10px;
+        }
+
+        .btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(79, 70, 229, 0.4);
+        }
+
+        .btn-danger {
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+        }
+
+        .btn-success {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+            background: white;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+        }
+
+        .data-table th, .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e5e7eb;
+        }
+
+        .data-table th {
+            background: #f8fafc;
+            color: #374151;
+            font-weight: 600;
+        }
+
+        .data-table tr:hover {
+            background: #f8fafc;
+        }
+
+        .message {
+            padding: 12px;
+            border-radius: 8px;
+            margin: 10px 0;
+            font-weight: 500;
+        }
+
+        .success {
+            background: #d1fae5;
+            color: #065f46;
+            border: 1px solid #10b981;
+        }
+
+        .error {
+            background: #fee2e2;
+            color: #991b1b;
+            border: 1px solid #ef4444;
+        }
+
+        .enrollment-section {
+            grid-column: 1 / -1;
+            margin-top: 20px;
+        }
+
+        .enrollment-form {
+            display: flex;
+            gap: 15px;
+            align-items: end;
+            flex-wrap: wrap;
+        }
+
+        .form-row {
+            display: flex;
+            gap: 15px;
+            margin-bottom: 15px;
+        }
+
+        .form-row .form-group {
+            flex: 1;
+        }
+
+        @media (max-width: 768px) {
+            .main-content {
+                grid-template-columns: 1fr;
+            }
+            
+            .form-row {
+                flex-direction: column;
+            }
+            
+            .enrollment-form {
+                flex-direction: column;
+                align-items: stretch;
+            }
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f3f3;
+            border-top: 3px solid #4f46e5;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🎓 Student Course Management System</h1>
+            <p>Manage students, courses, and enrollments all in one place</p>
+        </div>
+
+        <div class="main-content">
+            <!-- Student Management Section -->
+            <div class="section">
+                <h2>👨‍🎓 Student Management</h2>
+                
+                <div class="form-group">
+                    <label for="studentName">Student Name:</label>
+                    <input type="text" id="studentName" placeholder="Enter student name">
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" onclick="addStudent()">Add Student</button>
+                    <button class="btn" onclick="loadStudents()">Refresh Students</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="updateStudentId">Update Student ID:</label>
+                        <input type="number" id="updateStudentId" placeholder="Student ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateStudentName">New Name:</label>
+                        <input type="text" id="updateStudentName" placeholder="New name">
+                    </div>
+                </div>
+                <button class="btn btn-success" onclick="updateStudent()">Update Student</button>
+
+                <div class="form-group">
+                    <label for="deleteStudentId">Delete Student ID:</label>
+                    <input type="number" id="deleteStudentId" placeholder="Student ID to delete">
+                    <button class="btn btn-danger" onclick="deleteStudent()">Delete Student</button>
+                </div>
+
+                <div id="studentMessage" class="message" style="display: none;"></div>
+                
+                <table class="data-table" id="studentsTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Course Management Section -->
+            <div class="section">
+                <h2>📚 Course Management</h2>
+                
+                <div class="form-group">
+                    <label for="courseName">Course Name:</label>
+                    <input type="text" id="courseName" placeholder="Enter course name">
+                </div>
+                
+                <div class="form-group">
+                    <label for="courseCapacity">Course Capacity:</label>
+                    <input type="number" id="courseCapacity" placeholder="Enter capacity" min="1">
+                </div>
+                
+                <div class="form-group">
+                    <button class="btn" onclick="addCourse()">Add Course</button>
+                    <button class="btn" onclick="loadCourses()">Refresh Courses</button>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label for="updateCourseId">Update Course ID:</label>
+                        <input type="number" id="updateCourseId" placeholder="Course ID">
+                    </div>
+                    <div class="form-group">
+                        <label for="updateCourseName">New Name:</label>
+                        <input type="text" id="updateCourseName" placeholder="New name">
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="updateCourseCapacity">New Capacity:</label>
+                    <input type="number" id="updateCourseCapacity" placeholder="New capacity" min="1">
+                    <button class="btn btn-success" onclick="updateCourse()">Update Course</button>
+                </div>
+
+                <div class="form-group">
+                    <label for="deleteCourseId">Delete Course ID:</label>
+                    <input type="number" id="deleteCourseId" placeholder="Course ID to delete">
+                    <button class="btn btn-danger" onclick="deleteCourse()">Delete Course</button>
+                </div>
+
+                <div id="courseMessage" class="message" style="display: none;"></div>
+                
+                <table class="data-table" id="coursesTable">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Capacity</th>
+                            <th>Enrolled</th>
+                        </tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+
+            <!-- Enrollment Management Section -->
+            <div class="section enrollment-section">
+                <h2>🔗 Enrollment Management</h2>
+                
+                <div class="enrollment-form">
+                    <div class="form-group">
+                        <label for="enrollCourseId">Course ID:</label>
+                        <input type="number" id="enrollCourseId" placeholder="Course ID">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label for="enrollStudentId">Student ID:</label>
+                        <input type="number" id="enrollStudentId" placeholder="Student ID">
+                    </div>
+                    
+                    <div class="form-group">
+                        <button class="btn btn-success" onclick="enrollStudent()">Enroll Student</button>
+                        <button class="btn btn-danger" onclick="removeStudentFromCourse()">Remove Student</button>
+                    </div>
+                </div>
+
+                <div id="enrollmentMessage" class="message" style="display: none;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_BASE = '/api';
+        
+        // Load data on page load
+        window.onload = function() {
+            loadStudents();
+            loadCourses();
+        };
+
+        // Utility function to show messages
+        function showMessage(elementId, message, isSuccess = true) {
+            const element = document.getElementById(elementId);
+            element.textContent = message;
+            element.className = `message ${isSuccess ? 'success' : 'error'}`;
+            element.style.display = 'block';
+            
+            setTimeout(() => {
+                element.style.display = 'none';
+            }, 5000);
+        }
+
+        // Student Management Functions
+        async function addStudent() {
+            const name = document.getElementById('studentName').value.trim();
+            if (!name) {
+                showMessage('studentMessage', 'Please enter a student name', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/students/insert_student`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ studentName: name })
+                });
+
+                if (response.ok) {
+                    const student = await response.json();
+                    showMessage('studentMessage', `Student ${student.studentName} added successfully!`);
+                    document.getElementById('studentName').value = '';
+                    loadStudents();
+                } else {
+                    showMessage('studentMessage', 'Failed to add student', false);
+                }
+            } catch (error) {
+                showMessage('studentMessage', 'Error: ' + error.message, false);
+            }
+        }
+
+        async function loadStudents() {
+            try {
+                const response = await fetch(`${API_BASE}/students/`);
+                const students = await response.json();
+                
+                const tbody = document.querySelector('#studentsTable tbody');
+                tbody.innerHTML = '';
+                
+                students.forEach(student => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).textContent = student.studentId;
+                    row.insertCell(1).textContent = student.studentName;
+                });
+            } catch (error) {
+                showMessage('studentMessage', 'Error loading students: ' + error.message, false);
+            }
+        }
+
+        async function updateStudent() {
+            const id = document.getElementById('updateStudentId').value;
+            const name = document.getElementById('updateStudentName').value.trim();
+            
+            if (!id || !name) {
+                showMessage('studentMessage', 'Please enter both student ID and new name', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/students/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ studentName: name })
+                });
+
+                if (response.ok) {
+                    showMessage('studentMessage', 'Student updated successfully!');
+                    document.getElementById('updateStudentId').value = '';
+                    document.getElementById('updateStudentName').value = '';
+                    loadStudents();
+                } else {
+                    showMessage('studentMessage', 'Student not found or update failed', false);
+                }
+            } catch (error) {
+                showMessage('studentMessage', 'Error: ' + error.message, false);
+            }
+        }
+
+        async function deleteStudent() {
+            const id = document.getElementById('deleteStudentId').value;
+            if (!id) {
+                showMessage('studentMessage', 'Please enter student ID to delete', false);
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this student?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/students/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('studentMessage', 'Student deleted successfully!');
+                    document.getElementById('deleteStudentId').value = '';
+                    loadStudents();
+                } else {
+                    showMessage('studentMessage', 'Student not found or delete failed', false);
+                }
+            } catch (error) {
+                showMessage('studentMessage', 'Error: ' + error.message, false);
+            }
+        }
+
+        // Course Management Functions
+        async function addCourse() {
+            const name = document.getElementById('courseName').value.trim();
+            const capacity = document.getElementById('courseCapacity').value;
+            
+            if (!name || !capacity) {
+                showMessage('courseMessage', 'Please enter both course name and capacity', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/courses/insert_course`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        courseName: name,
+                        capacity: parseInt(capacity)
+                    })
+                });
+
+                if (response.ok) {
+                    const course = await response.json();
+                    showMessage('courseMessage', `Course ${course.courseName} added successfully!`);
+                    document.getElementById('courseName').value = '';
+                    document.getElementById('courseCapacity').value = '';
+                    loadCourses();
+                } else {
+                    showMessage('courseMessage', 'Failed to add course', false);
+                }
+            } catch (error) {
+                showMessage('courseMessage', 'Error: ' + error.message, false);
+            }
+        }
+
+        async function loadCourses() {
+            try {
+                const response = await fetch(`${API_BASE}/courses`);
+                const courses = await response.json();
+                
+                const tbody = document.querySelector('#coursesTable tbody');
+                tbody.innerHTML = '';
+                
+                courses.forEach(course => {
+                    const row = tbody.insertRow();
+                    row.insertCell(0).textContent = course.courseId;
+                    row.insertCell(1).textContent = course.courseName;
+                    row.insertCell(2).textContent = course.capacity;
+                    row.insertCell(3).textContent = course.students ? course.students.length : 0;
+                });
+            } catch (error) {
+                showMessage('courseMessage', 'Error loading courses: ' + error.message, false);
+            }
+        }
+
+        async function updateCourse() {
+            const id = document.getElementById('updateCourseId').value;
+            const name = document.getElementById('updateCourseName').value.trim();
+            const capacity = document.getElementById('updateCourseCapacity').value;
+            
+            if (!id || !name || !capacity) {
+                showMessage('courseMessage', 'Please fill in all course update fields', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/courses/${id}`, {
+                    method: 'PUT',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ 
+                        courseName: name,
+                        capacity: parseInt(capacity)
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('courseMessage', 'Course updated successfully!');
+                    document.getElementById('updateCourseId').value = '';
+                    document.getElementById('updateCourseName').value = '';
+                    document.getElementById('updateCourseCapacity').value = '';
+                    loadCourses();
+                } else {
+                    showMessage('courseMessage', 'Course not found or update failed', false);
+                }
+            } catch (error) {
+                showMessage('courseMessage', 'Error: ' + error.message, false);
+            }
+        }
+
+        async function deleteCourse() {
+            const id = document.getElementById('deleteCourseId').value;
+            if (!id) {
+                showMessage('courseMessage', 'Please enter course ID to delete', false);
+                return;
+            }
+
+            if (!confirm('Are you sure you want to delete this course?')) {
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/courses/${id}`, {
+                    method: 'DELETE'
+                });
+
+                if (response.ok) {
+                    showMessage('courseMessage', 'Course deleted successfully!');
+                    document.getElementById('deleteCourseId').value = '';
+                    loadCourses();
+                } else {
+                    showMessage('courseMessage', 'Course not found or delete failed', false);
+                }
+            } catch (error) {
+                showMessage('courseMessage', 'Error: ' + error.message, false);
+            }
+        }
+
+        // Enrollment Management Functions
+        async function enrollStudent() {
+            const courseId = document.getElementById('enrollCourseId').value;
+            const studentId = document.getElementById('enrollStudentId').value;
+            
+            if (!courseId || !studentId) {
+                showMessage('enrollmentMessage', 'Please enter both course ID and student ID', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/courses/${courseId}/students/${studentId}`, {
+                    method: 'POST'
+                });
+
+                const result = await response.text();
+                
+                if (response.ok) {
+                    showMessage('enrollmentMessage', result);
+                    document.getElementById('enrollCourseId').value = '';
+                    document.getElementById('enrollStudentId').value = '';
+                    loadCourses(); // Refresh to show updated enrollment counts
+                } else {
+                    showMessage('enrollmentMessage', result, false);
+                }
+            } catch (error) {
+                showMessage('enrollmentMessage', 'Error: ' + error.message, false);
+            }
+        }
+
+        async function removeStudentFromCourse() {
+            const courseId = document.getElementById('enrollCourseId').value;
+            const studentId = document.getElementById('enrollStudentId').value;
+            
+            if (!courseId || !studentId) {
+                showMessage('enrollmentMessage', 'Please enter both course ID and student ID', false);
+                return;
+            }
+
+            try {
+                const response = await fetch(`${API_BASE}/courses/${courseId}/students/${studentId}`, {
+                    method: 'DELETE'
+                });
+
+                const result = await response.text();
+                
+                if (response.ok) {
+                    showMessage('enrollmentMessage', result);
+                    document.getElementById('enrollCourseId').value = '';
+                    document.getElementById('enrollStudentId').value = '';
+                    loadCourses(); // Refresh to show updated enrollment counts
+                } else {
+                    showMessage('enrollmentMessage', result, false);
+                }
+            } catch (error) {
+                showMessage('enrollmentMessage', 'Error: ' + error.message, false);
+            }
+        }
+    </script>
+</body>
+</html>
