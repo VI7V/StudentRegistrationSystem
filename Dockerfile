@@ -1,18 +1,25 @@
-# Use Java 17
-FROM eclipse-temurin:17-jdk-alpine
+# ---------- BUILD STAGE ----------
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
-# Set working directory
 WORKDIR /app
 
-# Copy Maven build files
+# Copy pom.xml and source code
 COPY pom.xml .
 COPY src ./src
 
 # Build the application
-RUN ./mvnw clean package || mvn clean package
+RUN mvn clean package -DskipTests
 
-# Expose Render's port
+# ---------- RUNTIME STAGE ----------
+FROM eclipse-temurin:17-jdk-alpine
+
+WORKDIR /app
+
+# Copy built JAR from build stage
+COPY --from=build /app/target/*.jar app.jar
+
+# Expose Render port
 EXPOSE 10000
 
-# Run the JAR
-CMD ["sh", "-c", "java -jar target/*.jar"]
+# Run the app
+CMD ["java", "-jar", "app.jar"]
